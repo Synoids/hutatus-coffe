@@ -46,7 +46,7 @@ Navbar pelanggan menggunakan `usePathname()` untuk mendeteksi rute. Navbar akan 
 ```env
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-ADMIN_PIN=252525
+ADMIN_PIN=12345
 ```
 
 ### 2. Update QRIS Payment
@@ -57,10 +57,4 @@ Nomor WA Admin dapat diubah langsung di file `app/success/page.tsx` pada konstan
 
 ---
 
-## 📦 Pengembangan Masa Depan
--   Integrasi Payment Gateway (Midtrans) untuk verifikasi pembayaran otomatis.
--   Upload Bukti Transfer langsung ke Supabase Storage.
--   Print struk pesanan otomatis untuk Admin.
-
----
-&copy; 2026 **Hutatus Coffee**. Build with 🖤 by Antigravity.
+&copy; 2026 **Hutatus Coffee**. Build with 🖤 by Eriel Budiman.

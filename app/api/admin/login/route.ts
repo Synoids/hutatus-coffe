@@ -4,7 +4,7 @@ import { cookies } from 'next/headers'
 export async function POST(req: NextRequest) {
   try {
     const { pin } = await req.json()
-    const validPin = process.env.ADMIN_PIN || '252525'
+    const validPin = process.env.ADMIN_PIN || '12345'
 
     if (pin === validPin) {
       // Set a simple cookie for "session"
