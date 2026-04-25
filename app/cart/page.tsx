@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useCart } from '@/context/CartContext'
 import { TrashIcon } from '@/components/Icons'
+import { SIZE_LABELS, SUGAR_LABELS, ICE_LABELS } from '@/lib/types'
 
 export default function CartPage() {
   const { items, removeItem, updateQuantity, totalPrice, clearCart } = useCart()
@@ -28,7 +29,7 @@ export default function CartPage() {
         {/* Daftar Item */}
         <div className="lg:col-span-2 space-y-4">
           {items.map((item) => (
-            <div key={item.id} className="card p-5 flex items-center gap-5">
+            <div key={item.cartKey} className="card p-5 flex items-center gap-5">
               <img
                 src={item.image_url || 'https://images.unsplash.com/photo-1550133730-695473e544be?auto=format&fit=crop&q=80&w=200'}
                 alt={item.name}
@@ -36,24 +37,42 @@ export default function CartPage() {
               />
               <div className="flex-1 min-w-0">
                 <h3 className="font-bold text-stone-900 truncate">{item.name}</h3>
-                <p className="text-amber-700 font-semibold">
-                  Rp {Number(item.price).toLocaleString('id-ID')}
+                {/* Variation tags */}
+                <div className="flex flex-wrap gap-1.5 mt-1">
+                  {item.selectedSize && (
+                    <span className="text-xs bg-stone-100 text-stone-600 px-2 py-0.5 rounded-full font-medium">
+                      {SIZE_LABELS[item.selectedSize]}
+                    </span>
+                  )}
+                  {item.selectedIce && (
+                    <span className="text-xs bg-sky-50 text-sky-700 px-2 py-0.5 rounded-full font-medium">
+                      {ICE_LABELS[item.selectedIce]}
+                    </span>
+                  )}
+                  {item.selectedSugar && (
+                    <span className="text-xs bg-amber-50 text-amber-700 px-2 py-0.5 rounded-full font-medium">
+                      {SUGAR_LABELS[item.selectedSugar]}
+                    </span>
+                  )}
+                </div>
+                <p className="text-amber-700 font-semibold mt-1">
+                  Rp {Number(item.effectivePrice).toLocaleString('id-ID')}
                 </p>
               </div>
 
               {/* Pengatur Jumlah */}
               <div className="flex items-center gap-2 flex-shrink-0">
                 <button
-                  id={`kurang-qty-${item.id}`}
-                  onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                  id={`kurang-qty-${item.cartKey}`}
+                  onClick={() => updateQuantity(item.cartKey, item.quantity - 1)}
                   className="w-8 h-8 rounded-lg border border-stone-200 flex items-center justify-center hover:border-amber-400 hover:text-amber-700 font-bold transition-colors"
                 >
                   −
                 </button>
                 <span className="w-8 text-center font-semibold">{item.quantity}</span>
                 <button
-                  id={`tambah-qty-${item.id}`}
-                  onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                  id={`tambah-qty-${item.cartKey}`}
+                  onClick={() => updateQuantity(item.cartKey, item.quantity + 1)}
                   className="w-8 h-8 rounded-lg border border-stone-200 flex items-center justify-center hover:border-amber-400 hover:text-amber-700 font-bold transition-colors"
                 >
                   +
@@ -62,13 +81,13 @@ export default function CartPage() {
 
               {/* Subtotal */}
               <p className="w-28 text-right font-bold text-stone-900 flex-shrink-0">
-                Rp {(Number(item.price) * item.quantity).toLocaleString('id-ID')}
+                Rp {(Number(item.effectivePrice) * item.quantity).toLocaleString('id-ID')}
               </p>
 
               {/* Hapus */}
               <button
-                id={`hapus-item-${item.id}`}
-                onClick={() => removeItem(item.id)}
+                id={`hapus-item-${item.cartKey}`}
+                onClick={() => removeItem(item.cartKey)}
                 className="text-stone-400 hover:text-red-500 transition-colors flex-shrink-0 ml-2"
                 aria-label="Hapus item"
               >
@@ -92,9 +111,13 @@ export default function CartPage() {
             <h2 className="text-xl font-bold text-stone-900 mb-6">Ringkasan Pesanan</h2>
             <div className="space-y-3 text-sm">
               {items.map((item) => (
-                <div key={item.id} className="flex justify-between text-stone-600">
-                  <span className="truncate pr-2">{item.name} × {item.quantity}</span>
-                  <span className="flex-shrink-0">Rp {(Number(item.price) * item.quantity).toLocaleString('id-ID')}</span>
+                <div key={item.cartKey} className="flex justify-between text-stone-600">
+                  <span className="truncate pr-2">
+                    {item.name}
+                    {item.selectedSize && ` (${SIZE_LABELS[item.selectedSize]})`}
+                    {' '}× {item.quantity}
+                  </span>
+                  <span className="flex-shrink-0">Rp {(Number(item.effectivePrice) * item.quantity).toLocaleString('id-ID')}</span>
                 </div>
               ))}
             </div>

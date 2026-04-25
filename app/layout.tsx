@@ -47,8 +47,11 @@ export default function RootLayout({
                 </p>
               </div>
             </div>
-            <div className="text-center text-xs text-stone-600 mt-12">
-              &copy; {new Date().getFullYear()} Hutatus Coffee. All rights reserved.
+            <div className="text-center text-xs text-stone-600 mt-12 flex flex-col items-center gap-2">
+              <p>&copy; {new Date().getFullYear()} Hutatus Coffee. All rights reserved.</p>
+              <a href="/login" className="hover:text-stone-500 transition-colors opacity-50 hover:opacity-100">
+                Admin Area
+              </a>
             </div>
           </footer>
         </CartProvider>

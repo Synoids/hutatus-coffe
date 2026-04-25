@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { supabase } from '@/lib/supabaseClient'
 import { Order } from '@/lib/types'
 import { ClockIcon, CheckCircleIcon } from '@/components/Icons'
@@ -92,7 +93,7 @@ export default function TransaksiPage() {
         ) : (
           <div className="space-y-6">
             {orders.map((order) => (
-              <div key={order.id} className="card p-6">
+              <div key={order.id} className="card p-6 hover:shadow-md transition-shadow group relative">
                 <div className="flex items-start justify-between mb-4 flex-wrap gap-3">
                   <div>
                     <p className="font-bold text-stone-900">{order.customers?.name}</p>
@@ -101,13 +102,22 @@ export default function TransaksiPage() {
                       {order.created_at ? new Date(order.created_at).toLocaleString('id-ID') : '—'}
                     </p>
                   </div>
-                  <span className={statusClasses[order.status] || 'badge-pending'}>
-                    {order.status === 'completed'
-                      ? <CheckCircleIcon className="w-3 h-3" />
-                      : <ClockIcon className="w-3 h-3" />
-                    }
-                    {statusLabel[order.status] || order.status}
-                  </span>
+                  <div className="flex flex-col items-end gap-2">
+                    <span className={statusClasses[order.status] || 'badge-pending'}>
+                      {order.status === 'completed'
+                        ? <CheckCircleIcon className="w-3 h-3" />
+                        : <ClockIcon className="w-3 h-3" />
+                      }
+                      {statusLabel[order.status] || order.status}
+                    </span>
+                    {/* Link ke halaman sukses/instruksi */}
+                    <Link 
+                      href={`/success?orderId=${order.id}`}
+                      className="text-xs font-bold text-amber-700 hover:underline flex items-center gap-1"
+                    >
+                      {order.status === 'pending' ? '💳 Lihat Instruksi Bayar' : '📄 Lihat Detail'}
+                    </Link>
+                  </div>
                 </div>
 
                 <div className="space-y-2 text-sm border-t border-stone-100 pt-4">

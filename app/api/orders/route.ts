@@ -39,16 +39,26 @@ export async function POST(req: NextRequest) {
       .single()
 
     if (orderError) {
-      console.error('Order error details:', orderError) // Ini akan memunculkan detail error di terminal
+      console.error('Order error details:', orderError)
       return NextResponse.json({ error: 'Failed to create order.', details: orderError.message }, { status: 500 })
     }
 
-    // 4. Insert order items
-    const orderItems = items.map((item: { product_id: string; quantity: number; price: number }) => ({
+    // 4. Insert order items (with size, sugar_level, ice_level)
+    const orderItems = items.map((item: {
+      product_id: string
+      quantity: number
+      price: number
+      size?: string | null
+      sugar_level?: string | null
+      ice_level?: string | null
+    }) => ({
       order_id: orderData.id,
       product_id: item.product_id,
       quantity: item.quantity,
       price: item.price,
+      size: item.size ?? null,
+      sugar_level: item.sugar_level ?? null,
+      ice_level: item.ice_level ?? null,
     }))
 
     const { error: itemsError } = await supabase.from('order_items').insert(orderItems)

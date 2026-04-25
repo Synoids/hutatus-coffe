@@ -4,10 +4,17 @@ import Link from 'next/link'
 import { useCart } from '@/context/CartContext'
 import { ShoppingCartIcon, CoffeeIcon } from './Icons'
 import { useState } from 'react'
+import { usePathname } from 'next/navigation'
 
 export default function Navbar() {
   const { totalItems } = useCart()
   const [menuOpen, setMenuOpen] = useState(false)
+  const pathname = usePathname()
+
+  // Sembunyikan navbar jika di halaman admin atau login
+  if (pathname.startsWith('/admin') || pathname.startsWith('/login')) {
+    return null
+  }
 
   return (
     <nav className="border-b border-stone-200 bg-white/90 backdrop-blur-md sticky top-0 z-50 shadow-sm">

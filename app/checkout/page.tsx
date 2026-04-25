@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useCart } from '@/context/CartContext'
+import { SIZE_LABELS, SUGAR_LABELS, ICE_LABELS } from '@/lib/types'
 
 export default function CheckoutPage() {
   const router = useRouter()
@@ -37,7 +38,10 @@ export default function CheckoutPage() {
           items: items.map((i) => ({
             product_id: i.id,
             quantity: i.quantity,
-            price: i.price,
+            price: i.effectivePrice,
+            size: i.selectedSize ?? null,
+            sugar_level: i.selectedSugar ?? null,
+            ice_level: i.selectedIce ?? null,
           })),
           total_price: totalPrice,
           payment_method: paymentMethod,
@@ -174,9 +178,23 @@ export default function CheckoutPage() {
             <h2 className="text-xl font-bold text-stone-900 mb-5">Ringkasan Pesanan</h2>
             <div className="space-y-3 text-sm">
               {items.map((item) => (
-                <div key={item.id} className="flex justify-between text-stone-600">
-                  <span className="truncate pr-2">{item.name} × {item.quantity}</span>
-                  <span className="flex-shrink-0">Rp {(Number(item.price) * item.quantity).toLocaleString('id-ID')}</span>
+                <div key={item.cartKey}>
+                  <div className="flex justify-between text-stone-700 font-medium">
+                    <span className="truncate pr-2">{item.name} × {item.quantity}</span>
+                    <span className="flex-shrink-0">Rp {(Number(item.effectivePrice) * item.quantity).toLocaleString('id-ID')}</span>
+                  </div>
+                  {/* Variasi */}
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    {item.selectedSize && (
+                      <span className="text-xs text-stone-400">{SIZE_LABELS[item.selectedSize]}</span>
+                    )}
+                    {item.selectedIce && (
+                      <span className="text-xs text-stone-400">· {ICE_LABELS[item.selectedIce]}</span>
+                    )}
+                    {item.selectedSugar && (
+                      <span className="text-xs text-stone-400">· {SUGAR_LABELS[item.selectedSugar]}</span>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>

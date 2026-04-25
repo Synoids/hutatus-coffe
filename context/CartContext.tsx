@@ -1,13 +1,19 @@
 'use client'
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
-import { CartItem, Product } from '@/lib/types'
+import { CartItem, Product, CupSize, SugarLevel, IceLevel } from '@/lib/types'
+
+interface AddItemOptions {
+  size?: CupSize
+  sugarLevel?: SugarLevel
+  iceLevel?: IceLevel
+}
 
 interface CartContextType {
   items: CartItem[]
-  addItem: (product: Product) => void
-  removeItem: (productId: string) => void
-  updateQuantity: (productId: string, quantity: number) => void
+  addItem: (product: Product, options?: AddItemOptions) => void
+  removeItem: (cartKey: string) => void
+  updateQuantity: (cartKey: string, quantity: number) => void
   clearCart: () => void
   totalItems: number
   totalPrice: number
@@ -15,7 +21,19 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined)
 
-const CART_STORAGE_KEY = 'hutatus_coffee_cart'
+const CART_STORAGE_KEY = 'hutatus_coffee_cart_v2'
+
+function resolvePrice(product: Product, size?: CupSize): number {
+  if (!product.has_size_option || !size) return product.price
+  if (size === 'small' && product.size_price_small) return product.size_price_small
+  if (size === 'medium' && product.size_price_medium) return product.size_price_medium
+  if (size === 'large' && product.size_price_large) return product.size_price_large
+  return product.price
+}
+
+function buildCartKey(id: string, size?: CupSize, sugar?: SugarLevel, ice?: IceLevel): string {
+  return `${id}__${size ?? 'none'}__${sugar ?? 'none'}__${ice ?? 'none'}`
+}
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([])
@@ -37,29 +55,44 @@ export function CartProvider({ children }: { children: ReactNode }) {
     localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items))
   }, [items])
 
-  const addItem = (product: Product) => {
+  const addItem = (product: Product, options?: AddItemOptions) => {
+    const { size, sugarLevel, iceLevel } = options ?? {}
+    const cartKey = buildCartKey(product.id, size, sugarLevel, iceLevel)
+    const effectivePrice = resolvePrice(product, size)
+
     setItems((prev) => {
-      const existing = prev.find((i) => i.id === product.id)
+      const existing = prev.find((i) => i.cartKey === cartKey)
       if (existing) {
         return prev.map((i) =>
-          i.id === product.id ? { ...i, quantity: i.quantity + 1 } : i
+          i.cartKey === cartKey ? { ...i, quantity: i.quantity + 1 } : i
         )
       }
-      return [...prev, { ...product, quantity: 1 }]
+      return [
+        ...prev,
+        {
+          ...product,
+          quantity: 1,
+          cartKey,
+          selectedSize: size,
+          selectedSugar: sugarLevel,
+          selectedIce: iceLevel,
+          effectivePrice,
+        },
+      ]
     })
   }
 
-  const removeItem = (productId: string) => {
-    setItems((prev) => prev.filter((i) => i.id !== productId))
+  const removeItem = (cartKey: string) => {
+    setItems((prev) => prev.filter((i) => i.cartKey !== cartKey))
   }
 
-  const updateQuantity = (productId: string, quantity: number) => {
+  const updateQuantity = (cartKey: string, quantity: number) => {
     if (quantity <= 0) {
-      removeItem(productId)
+      removeItem(cartKey)
       return
     }
     setItems((prev) =>
-      prev.map((i) => (i.id === productId ? { ...i, quantity } : i))
+      prev.map((i) => (i.cartKey === cartKey ? { ...i, quantity } : i))
     )
   }
 
@@ -69,7 +102,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }
 
   const totalItems = items.reduce((sum, i) => sum + i.quantity, 0)
-  const totalPrice = items.reduce((sum, i) => sum + i.price * i.quantity, 0)
+  const totalPrice = items.reduce((sum, i) => sum + i.effectivePrice * i.quantity, 0)
 
   return (
     <CartContext.Provider
